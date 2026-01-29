@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AITU University MS</title>
+    <style>
+        :root {
+            --primary: #003366;
+            --secondary: #10b981;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header img { height: 80px; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .btn-refresh { background: #64748b; }
+        .btn-course { background: var(--secondary); }
+
+        .display-area {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px inset #e2e8f0;
+        }
+
+        .error-msg { color: #dc2626; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/Logo_astana_it_university.png" alt="AITU Logo">
+        <h1>University MS</h1>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h2 class="section-title">Universities 🏛️</h2>
+            <input type="text" id="uniName" placeholder="University Name">
+            <input type="text" id="uniLoc" placeholder="Location">
+            <input type="text" id="uniRating" placeholder="Rating">
+
+            <button onclick="addUniversity()">Add University</button>
+            <button class="btn-refresh" onclick="fetchUniversities()">Refresh List</button>
+
+            <div id="uniDisplay" class="display-area">Loading...</div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">Courses 📚</h2>
+            <input type="text" id="courseName" placeholder="Course Name">
+            <input type="text" id="courseCode" placeholder="Course Code">
+            <input type="text" id="courseCredits" placeholder="Credits">
+
+            <button class="btn-course" onclick="addCourse()">Add Course</button>
+            <button class="btn-refresh" onclick="fetchCourses()">Refresh List</button>
+
+            <div id="courseDisplay" class="display-area">Loading...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_UNI = '/universities';
+    const API_COURSE = '/courses';
+
+    async function fetchUniversities() {
+        try {
+            const res = await fetch(API_UNI);
+            const data = await res.text();
+            document.getElementById('uniDisplay').innerText = data;
+        } catch (e) { document.getElementById('uniDisplay').innerHTML = '<span class="error-msg">Server offline</span>'; }
+    }
+
+    async function addUniversity() {
+        const payload = {
+            name: document.getElementById('uniName').value,
+            location: document.getElementById('uniLoc').value,
+            rating: parseInt(document.getElementById('uniRating').value) || 0
+        };
+
+        await fetch(API_UNI, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        fetchUniversities();
+    }
+
+    async function fetchCourses() {
+        try {
+            const res = await fetch(API_COURSE);
+            const data = await res.text();
+            document.getElementById('courseDisplay').innerText = data;
+        } catch (e) { document.getElementById('courseDisplay').innerHTML = '<span class="error-msg">Server offline</span>'; }
+    }
+
+    async function addCourse() {
+        const payload = {
+            courseName: document.getElementById('courseName').value,
+            courseCode: document.getElementById('courseCode').value,
+            credits: parseInt(document.getElementById('courseCredits').value) || 0
+        };
+
+        await fetch(API_COURSE, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        fetchCourses();
+    }
+
+    window.onload = () => { fetchUniversities(); fetchCourses(); };
+</script>
+</body>
+</html>
